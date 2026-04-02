@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Efecto Media Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8F9FC;
+            color: #1A2C3E;
+        }
+
+        .dashboard-header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dashboard-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #00D27F;
+            font-size: 1.8rem;
+        }
+
+        .logo span {
+            color: #0A2540;
+        }
+
+        .logo .highlight {
+            color: #00D27F;
+        }
+
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244,67,54,0.3);
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard-title {
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title h1 {
+            color: #0A2540;
+            font-size: 2rem;
+        }
+
+        .dashboard-title p {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            color: #00D27F;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin: 0.5rem 0;
+            color: #0A2540;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .section-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-header-flex h2 {
+            color: #0A2540;
+            font-size: 1.5rem;
+        }
+
+        .btn-add {
+            background: #00D27F;
+            color: #0A2540;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,210,127,0.3);
+        }
+
+        .projects-table, .drafts-table {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #F8F9FC;
+            font-weight: 600;
+            color: #0A2540;
+        }
+
+        .btn-edit, .btn-delete, .btn-pdf, .btn-edit-draft {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 0.2rem;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-edit {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-pdf {
+            background: #FF5722;
+            color: white;
+        }
+
+        .btn-edit-draft {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-edit:hover, .btn-delete:hover, .btn-pdf:hover, .btn-edit-draft:hover {
+            transform: translateY(-2px);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #0A2540;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #00D27F;
+        }
+
+        .btn-primary {
+            background: #00D27F;
+            color: #0A2540;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,210,127,0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .quote-status {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-draft {
+            background: #ffc107;
+            color: #856404;
+        }
+
+        .items-container {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 0.5fr;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            align-items: center;
+        }
+
+        .item-row input, .item-row select {
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .btn-remove-item {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-add-item {
+            background: #00D27F;
+            color: #0A2540;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        .total-calculated {
+            background: #0A2540;
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            color: #0A2540;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 0 1rem;
+            }
+            
+            th, td {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .item-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <div class="dashboard-nav">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>Efecto<span class="highlight">Media</span></span>
+            </div>
+            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+        </div>
+    </div>
+    
+    <div class="dashboard-container">
+        <div class="dashboard-title">
+            <h1>Panel de Control</h1>
+            <p>Gestiona proyectos, cotizaciones y contenido de la landing page</p>
+        </div>
+        
+        <div class="stats-grid" id="statsGrid"></div>
+        
+        <!-- Sección de Cotizaciones -->
+        <div class="section-card">
+            <div class="section-header-flex">
+                <h2><i class="fas fa-file-invoice-dollar"></i> Generar Nueva Cotización</h2>
+            </div>
+            <form id="quoteGeneratorForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Cliente</label>
+                        <input type="text" id="quoteClient" placeholder="Nombre del cliente o empresa">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email del cliente</label>
+                        <input type="email" id="quoteClientEmail" placeholder="cliente@email.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-globe"></i> Moneda</label>
+                    <select id="quoteCurrency">
+                        <option value="USD">USD ($) - Dólar Americano</option>
+                        <option value="EUR">EUR (€) - Euro</option>
+                        <option value="HNL">HNL (L) - Lempira Hondureño</option>
+                    </select>
+                </div>
+                
+                <label><i class="fas fa-shopping-cart"></i> Items/Servicios</label>
+                <div id="itemsContainer" class="items-container">
+                    <div class="item-row" data-item-id="1">
+                        <input type="text" class="item-name" placeholder="Nombre del servicio/producto" style="grid-column: span 1;">
+                        <input type="number" class="item-price" placeholder="Precio unitario" step="0.01">
+                        <input type="number" class="item-quantity" placeholder="Cantidad" value="1" min="1">
+                        <button type="button" class="btn-remove-item" onclick="removeItem(this)">✖</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-add-item" onclick="addNewItem()">+ Agregar otro item</button>
+                
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label><i class="fas fa-percent"></i> ISV (Impuesto) %</label>
+                    <input type="number" id="isvRate" step="0.01" value="15" placeholder="Ej: 15">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> Descripción adicional</label>
+                    <textarea id="quoteDescription" rows="3" placeholder="Términos, condiciones, notas adicionales..."></textarea>
+                </div>
+                
+                <div class="total-calculated" id="totalDisplay">
+                    Total: $0.00
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="submit" class="btn-primary" id="saveQuoteBtn">
+                        <i class="fas fa-save"></i> Guardar como Borrador
+                    </button>
+                    <button type="button" class="btn-primary" id="generatePDFBtn" style="background: #FF5722;">
+                        <i class="fas fa-file-pdf"></i> Generar PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Borradores de Cotizaciones -->
+        <div class="section-card">
+            <div class="section-header-flex">
+                <h2><i class="fas fa-pencil-alt"></i> Cotizaciones en Borrador</h2>
+            </div>
+            <div class="drafts-table">
+                <table id="draftsTable">
+                    <thead>
+                        <tr><th>ID</th><th>Cliente</th><th>Items</th><th>Subtotal</th><th>ISV</th><th>Total</th><th>Moneda</th><th>Estado</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody id="draftsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+          <!-- Gestión de Imagen del Hero -->
+        <div class="section-card">
+            <div class="section-header-flex">
+                <h2><i class="fas fa-image"></i> Imagen de Portada (Hero)</h2>
+            </div>
+            <div class="form-group">
+                <label>URL de la imagen de fondo</label>
+                <input type="text" id="heroImageUrl" placeholder="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1920&h=1080&fit=crop">
+                <small style="display: block; margin-top: 0.5rem; color: #666;">Ejemplo: https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1920&h=1080&fit=crop</small>
+            </div>
+            <div id="heroPreview" style="margin-top: 1rem; border-radius: 12px; overflow: hidden; display: none;">
+                <img id="heroPreviewImg" src="" alt="Vista previa" style="width: 100%; height: 200px; object-fit: cover;">
+            </div>
+            <button class="btn-primary" id="saveHeroImageBtn" style="margin-top: 1rem;">
+                <i class="fas fa-save"></i> Guardar imagen de portada
+            </button>
+        </div>
+    
+    <!-- Modal para agregar/editar proyecto -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Agregar Proyecto</h3>
+            <form id="projectForm">
+                <input type="hidden" id="projectId">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="projectTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="projectDesc" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL de Imagen</label>
+                    <input type="text" id="projectImage" placeholder="https://images.unsplash.com/..." required>
+                </div>
+                <button type="submit" class="btn-primary" style="margin-top: 1rem;">Guardar</button>
+                <button type="button" class="btn-secondary" id="closeModal">Cancelar</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para editar borrador -->
+    <div id="editDraftModal" class="modal">
+        <div class="modal-content">
+            <h3>Editar Cotización</h3>
+            <form id="editDraftForm">
+                <input type="hidden" id="editDraftId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <input type="text" id="editClient">
+                    </div>
+                    <div class="form-group">
+                        <label>Email del cliente</label>
+                        <input type="email" id="editClientEmail">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Moneda</label>
+                    <select id="editCurrency">
+                        <option value="USD">USD ($) - Dólar Americano</option>
+                        <option value="EUR">EUR (€) - Euro</option>
+                        <option value="HNL">HNL (L) - Lempira Hondureño</option>
+                    </select>
+                </div>
+                <div id="editItemsContainer"></div>
+                <div class="form-group">
+                    <label>ISV (%)</label>
+                    <input type="number" id="editIsvRate" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Descripción adicional</label>
+                    <textarea id="editDescription" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Actualizar Borrador</button>
+                <button type="button" class="btn-secondary" id="closeEditModal">Cancelar</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // VERIFICAR AUTENTICACIÓN
+        if (localStorage.getItem('nexus_admin_logged') !== 'true') {
+            window.location.href = 'login.html';
+        }
+
+        let projects = [];
+        let quotes = [];
+        let draftQuotes = [];
+        let contacts = [];
+        let nextItemId = 2;
+
+        const currencySymbols = {
+            USD: '$',
+            EUR: '€',
+            HNL: 'L'
+        };
+
+        function addNewItem() {
+            const container = document.getElementById('itemsContainer');
+            const newId = nextItemId++;
+            const newItem = document.createElement('div');
+            newItem.className = 'item-row';
+            newItem.setAttribute('data-item-id', newId);
+            newItem.innerHTML = `
+                <input type="text" class="item-name" placeholder="Nombre del servicio/producto" style="grid-column: span 1;">
+                <input type="number" class="item-price" placeholder="Precio unitario" step="0.01">
+                <input type="number" class="item-quantity" placeholder="Cantidad" value="1" min="1">
+                <button type="button" class="btn-remove-item" onclick="removeItem(this)">✖</button>
+            `;
+            container.appendChild(newItem);
+            updateTotal();
+        }
+
+        function removeItem(btn) {
+            const container = document.getElementById('itemsContainer');
+            if (container.children.length > 1) {
+                btn.closest('.item-row').remove();
+                updateTotal();
+            } else {
+                alert('Debe haber al menos un item');
+            }
+        }
+
+        function updateTotal() {
+            const items = document.querySelectorAll('.item-row');
+            let subtotal = 0;
+            
+            items.forEach(item => {
+                const price = parseFloat(item.querySelector('.item-price')?.value) || 0;
+                const quantity = parseInt(item.querySelector('.item-quantity')?.value) || 0;
+                subtotal += price * quantity;
+            });
+            
+            const isvRate = parseFloat(document.getElementById('isvRate')?.value) || 0;
+            const isvAmount = subtotal * (isvRate / 100);
+            const total = subtotal + isvAmount;
+            const currency = document.getElementById('quoteCurrency')?.value || 'USD';
+            const symbol = currencySymbols[currency];
+            
+            document.getElementById('totalDisplay').innerHTML = `
+                <strong>Subtotal: ${symbol}${subtotal.toFixed(2)}</strong><br>
+                ISV (${isvRate}%): ${symbol}${isvAmount.toFixed(2)}<br>
+                <span style="font-size: 1.4rem;">TOTAL: ${symbol}${total.toFixed(2)}</span>
+            `;
+        }
+
+        document.addEventListener('input', function(e) {
+            if(e.target.classList && (e.target.classList.contains('item-price') || e.target.classList.contains('item-quantity') || e.target.id === 'isvRate' || e.target.id === 'quoteCurrency')) {
+                updateTotal();
+            }
+        });
+
+        function getItemsData() {
+            const items = [];
+            document.querySelectorAll('.item-row').forEach(item => {
+                const name = item.querySelector('.item-name')?.value || '';
+                const price = parseFloat(item.querySelector('.item-price')?.value) || 0;
+                const quantity = parseInt(item.querySelector('.item-quantity')?.value) || 0;
+                if(name && price > 0) {
+                    items.push({ name, price, quantity, total: price * quantity });
+                }
+            });
+            return items;
+        }
+
+        function initDefaultData() {
+            if (!localStorage.getItem('nexus_projects')) {
+                const defaultProjects = [
+                    { id: 1, title: "E-commerce Revolution", description: "Aumento de ventas del 320% para tienda online de moda.", image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop" },
+                    { id: 2, title: "Branding Corporativo", description: "Rediseño de identidad para empresa tecnológica líder.", image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&h=400&fit=crop" },
+                    { id: 3, title: "Campaña Viral TikTok", description: "+2M de reproducciones en menos de 30 días.", image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&h=400&fit=crop" }
+                ];
+                localStorage.setItem('nexus_projects', JSON.stringify(defaultProjects));
+            }
+            if (!localStorage.getItem('nexus_quotes')) localStorage.setItem('nexus_quotes', '[]');
+            if (!localStorage.getItem('nexus_draft_quotes')) localStorage.setItem('nexus_draft_quotes', '[]');
+            if (!localStorage.getItem('nexus_contacts')) localStorage.setItem('nexus_contacts', '[]');
+        }
+
+        function loadData() {
+            projects = JSON.parse(localStorage.getItem('nexus_projects') || '[]');
+            quotes = JSON.parse(localStorage.getItem('nexus_quotes') || '[]');
+            draftQuotes = JSON.parse(localStorage.getItem('nexus_draft_quotes') || '[]');
+            contacts = JSON.parse(localStorage.getItem('nexus_contacts') || '[]');
+            renderProjectsTable();
+            renderDraftsTable();
+            updateStats();
+        }
+
+        function renderProjectsTable() {
+            const tbody = document.getElementById('projectsTableBody');
+            if (!tbody) return;
+            if (projects.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay proyectos</td></tr>'; return; }
+            tbody.innerHTML = projects.map(project => `
+                <tr>
+                    <td>${project.id}</td>
+                    <td><img src="${project.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td>${escapeHtml(project.title)}</td>
+                    <td>${escapeHtml(project.description.substring(0, 60))}...</td>
+                    <td><button class="btn-edit" onclick="editProject(${project.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteProject(${project.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderDraftsTable() {
+            const tbody = document.getElementById('draftsTableBody');
+            if (!tbody) return;
+            if (draftQuotes.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No hay cotizaciones en borrador</td></tr>'; return; }
+            tbody.innerHTML = draftQuotes.map(quote => {
+                const symbol = currencySymbols[quote.currency || 'USD'];
+                return `
+                    <tr>
+                        <td>${quote.id}</td>
+                        <td>${escapeHtml(quote.client || 'Sin cliente')}</td>
+                        <td>${quote.items?.length || 0} items</td>
+                        <td>${symbol}${quote.subtotal?.toFixed(2) || 0}</td>
+                        <td>${quote.isvRate}% (${symbol}${quote.isvAmount?.toFixed(2) || 0})</td>
+                        <td><strong>${symbol}${quote.total?.toFixed(2) || 0}</strong></td>
+                        <td>${quote.currency || 'USD'}</td>
+                        <td><span class="quote-status status-draft">Borrador</span></td>
+                        <td><button class="btn-edit-draft" onclick="editDraft(${quote.id})"><i class="fas fa-edit"></i></button><button class="btn-pdf" onclick="generatePDFFromDraft(${quote.id})"><i class="fas fa-file-pdf"></i></button><button class="btn-delete" onclick="deleteDraft(${quote.id})"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function saveDraft(quoteData) {
+            const newId = Date.now();
+            const draft = { id: newId, ...quoteData, createdAt: new Date().toISOString() };
+            draftQuotes.push(draft);
+            localStorage.setItem('nexus_draft_quotes', JSON.stringify(draftQuotes));
+            loadData();
+            return draft;
+        }
+
+        function updateDraft(id, updatedData) {
+            const index = draftQuotes.findIndex(q => q.id == id);
+            if (index !== -1) { draftQuotes[index] = { ...draftQuotes[index], ...updatedData }; localStorage.setItem('nexus_draft_quotes', JSON.stringify(draftQuotes)); loadData(); return true; }
+            return false;
+        }
+
+        window.deleteDraft = (id) => { if (confirm('¿Eliminar esta cotización borrador?')) { draftQuotes = draftQuotes.filter(q => q.id != id); localStorage.setItem('nexus_draft_quotes', JSON.stringify(draftQuotes)); loadData(); alert('Borrador eliminado'); } };
+        
+        window.editDraft = (id) => { 
+            const draft = draftQuotes.find(q => q.id == id); 
+            if (draft) { 
+                document.getElementById('editDraftId').value = draft.id; 
+                document.getElementById('editClient').value = draft.client || ''; 
+                document.getElementById('editClientEmail').value = draft.clientEmail || ''; 
+                document.getElementById('editCurrency').value = draft.currency || 'USD';
+                document.getElementById('editIsvRate').value = draft.isvRate || 15; 
+                document.getElementById('editDescription').value = draft.description || ''; 
+                renderEditItems(draft.items || []); 
+                document.getElementById('editDraftModal').style.display = 'flex'; 
+            } 
+        };
+        
+        function renderEditItems(items) { 
+            const container = document.getElementById('editItemsContainer'); 
+            container.innerHTML = ''; 
+            items.forEach((item, idx) => { 
+                const div = document.createElement('div'); 
+                div.className = 'item-row'; 
+                div.innerHTML = `<input type="text" class="edit-item-name" value="${escapeHtml(item.name)}" placeholder="Nombre"><input type="number" class="edit-item-price" value="${item.price}" step="0.01" placeholder="Precio"><input type="number" class="edit-item-quantity" value="${item.quantity}" min="1" placeholder="Cantidad"><button type="button" class="btn-remove-item" onclick="this.closest('.item-row').remove()">✖</button>`; 
+                container.appendChild(div); 
+            }); 
+        }
+        
+        function getEditItemsData() { 
+            const items = []; 
+            document.querySelectorAll('#editItemsContainer .item-row').forEach(item => { 
+                const name = item.querySelector('.edit-item-name')?.value || ''; 
+                const price = parseFloat(item.querySelector('.edit-item-price')?.value) || 0; 
+                const quantity = parseInt(item.querySelector('.edit-item-quantity')?.value) || 0; 
+                if(name && price > 0) items.push({ name, price, quantity, total: price * quantity }); 
+            }); 
+            return items; 
+        }
+        
+        window.generatePDFFromDraft = async (id) => { const draft = draftQuotes.find(q => q.id == id); if (draft) await generatePDF(draft); };
+        
+        async function generatePDF(quoteData) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const symbol = currencySymbols[quoteData.currency || 'USD'];
+            let y = 20;
+            doc.setFillColor(10, 37, 64); doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.setFont('helvetica', 'bold'); doc.text('EFECTO MEDIA', 20, 25);
+            doc.setTextColor(0, 210, 127); doc.setFontSize(12); doc.text('Cotización Oficial', 20, 35);
+            doc.setTextColor(0, 0, 0); doc.setFontSize(10); doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 150, 20); doc.text(`Cotización #: ${quoteData.id}`, 150, 28);
+            doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.text('Información del Cliente:', 20, 60);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.text(`Nombre: ${quoteData.client || 'No especificado'}`, 20, 70); doc.text(`Email: ${quoteData.clientEmail || 'No especificado'}`, 20, 78);
+            doc.text(`Moneda: ${quoteData.currency || 'USD'} (${symbol})`, 20, 86);
+            doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.text('Detalles de la Cotización:', 20, 100);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+            let currentY = 110;
+            doc.text('Item', 20, currentY); doc.text('Cantidad', 100, currentY); doc.text('Precio Unit.', 130, currentY); doc.text('Total', 170, currentY);
+            currentY += 5; doc.line(20, currentY, 190, currentY); currentY += 5;
+            (quoteData.items || []).forEach(item => { doc.text(item.name.substring(0, 30), 20, currentY); doc.text(item.quantity.toString(), 105, currentY); doc.text(`${symbol}${item.price.toFixed(2)}`, 135, currentY); doc.text(`${symbol}${(item.price * item.quantity).toFixed(2)}`, 170, currentY); currentY += 8; });
+            currentY += 5; doc.line(20, currentY, 190, currentY); currentY += 5;
+            doc.text(`Subtotal: ${symbol}${quoteData.subtotal?.toFixed(2) || 0}`, 150, currentY); currentY += 7;
+            doc.text(`ISV (${quoteData.isvRate || 0}%): ${symbol}${quoteData.isvAmount?.toFixed(2) || 0}`, 150, currentY); currentY += 7;
+            doc.setFillColor(0, 210, 127); doc.rect(20, currentY - 3, 170, 10, 'F'); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.text(`TOTAL: ${symbol}${quoteData.total?.toFixed(2) || 0}`, 20, currentY + 4);
+            doc.setTextColor(100, 100, 100); doc.setFontSize(8); doc.text('* Esta cotización es válida por 30 días.', 20, 200); doc.text('* Para más información contacte a ventas@efectomedia.com', 20, 208);
+            doc.save(`cotizacion_${quoteData.id}.pdf`);
+            alert('PDF generado exitosamente');
+        }
+
+        function updateStats() {
+            const statsGrid = document.getElementById('statsGrid');
+            if (statsGrid) statsGrid.innerHTML = `<div class="stat-card"><i class="fas fa-tasks"></i><h3>${projects.length}</h3><p>Proyectos</p></div><div class="stat-card"><i class="fas fa-file-invoice-dollar"></i><h3>${quotes.length}</h3><p>Cotizaciones Finalizadas</p></div><div class="stat-card"><i class="fas fa-pencil-alt"></i><h3>${draftQuotes.length}</h3><p>Borradores</p></div><div class="stat-card"><i class="fas fa-envelope"></i><h3>${contacts.length}</h3><p>Contactos</p></div>`;
+        }
+
+        window.editProject = (id) => { const project = projects.find(p => p.id === id); if (project) { document.getElementById('modalTitle').textContent = 'Editar Proyecto'; document.getElementById('projectId').value = project.id; document.getElementById('projectTitle').value = project.title; document.getElementById('projectDesc').value = project.description; document.getElementById('projectImage').value = project.image; document.getElementById('projectModal').style.display = 'flex'; } };
+        window.deleteProject = (id) => { if (confirm('¿Eliminar este proyecto?')) { projects = projects.filter(p => p.id !== id); localStorage.setItem('nexus_projects', JSON.stringify(projects)); loadData(); alert('Proyecto eliminado'); } };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initDefaultData(); loadData();
+            document.getElementById('addProjectBtn')?.addEventListener('click', () => { document.getElementById('modalTitle').textContent = 'Agregar Proyecto'; document.getElementById('projectForm').reset(); document.getElementById('projectId').value = ''; document.getElementById('projectModal').style.display = 'flex'; });
+            document.getElementById('closeModal')?.addEventListener('click', () => { document.getElementById('projectModal').style.display = 'none'; });
+            document.getElementById('projectForm')?.addEventListener('submit', (e) => { e.preventDefault(); const id = document.getElementById('projectId').value; const title = document.getElementById('projectTitle').value; const description = document.getElementById('projectDesc').value; const image = document.getElementById('projectImage').value; if (id) { const index = projects.findIndex(p => p.id == id); if (index !== -1) projects[index] = { ...projects[index], title, description, image }; } else { projects.push({ id: Date.now(), title, description, image }); } localStorage.setItem('nexus_projects', JSON.stringify(projects)); document.getElementById('projectModal').style.display = 'none'; loadData(); alert('Proyecto guardado'); });
+            
+            document.getElementById('saveQuoteBtn')?.addEventListener('click', (e) => { e.preventDefault(); const items = getItemsData(); if (items.length === 0) { alert('Agrega al menos un item'); return; } const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0); const isvRate = parseFloat(document.getElementById('isvRate').value) || 0; const isvAmount = subtotal * (isvRate / 100); const total = subtotal + isvAmount; const quoteData = { client: document.getElementById('quoteClient').value, clientEmail: document.getElementById('quoteClientEmail').value, items, subtotal, isvRate, isvAmount, total, description: document.getElementById('quoteDescription').value, currency: document.getElementById('quoteCurrency').value }; saveDraft(quoteData); alert('Cotización guardada como borrador'); document.getElementById('quoteGeneratorForm').reset(); document.getElementById('itemsContainer').innerHTML = '<div class="item-row" data-item-id="1"><input type="text" class="item-name" placeholder="Nombre del servicio/producto"><input type="number" class="item-price" placeholder="Precio unitario" step="0.01"><input type="number" class="item-quantity" placeholder="Cantidad" value="1" min="1"><button type="button" class="btn-remove-item" onclick="removeItem(this)">✖</button></div>'; document.getElementById('quoteCurrency').value = 'USD'; updateTotal(); });
+            
+            document.getElementById('generatePDFBtn')?.addEventListener('click', async (e) => { e.preventDefault(); const items = getItemsData(); if (items.length === 0) { alert('Agrega al menos un item'); return; } const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0); const isvRate = parseFloat(document.getElementById('isvRate').value) || 0; const isvAmount = subtotal * (isvRate / 100); const total = subtotal + isvAmount; const quoteData = { id: Date.now(), client: document.getElementById('quoteClient').value, clientEmail: document.getElementById('quoteClientEmail').value, items, subtotal, isvRate, isvAmount, total, description: document.getElementById('quoteDescription').value, currency: document.getElementById('quoteCurrency').value, date: new Date().toISOString() }; await generatePDF(quoteData); quotes.push(quoteData); localStorage.setItem('nexus_quotes', JSON.stringify(quotes)); });
+            
+            document.getElementById('editDraftForm')?.addEventListener('submit', (e) => { e.preventDefault(); const id = parseInt(document.getElementById('editDraftId').value); const items = getEditItemsData(); if (items.length === 0) { alert('Agrega al menos un item'); return; } const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0); const isvRate = parseFloat(document.getElementById('editIsvRate').value) || 0; const isvAmount = subtotal * (isvRate / 100); const total = subtotal + isvAmount; updateDraft(id, { client: document.getElementById('editClient').value, clientEmail: document.getElementById('editClientEmail').value, items, subtotal, isvRate, isvAmount, total, description: document.getElementById('editDescription').value, currency: document.getElementById('editCurrency').value }); document.getElementById('editDraftModal').style.display = 'none'; alert('Borrador actualizado'); });
+            
+            document.getElementById('closeEditModal')?.addEventListener('click', () => { document.getElementById('editDraftModal').style.display = 'none'; });
+            document.getElementById('logoutBtn')?.addEventListener('click', () => { localStorage.removeItem('nexus_admin_logged'); window.location.href = 'login.html'; });
+            window.onclick = function(event) { if (event.target === document.getElementById('projectModal')) document.getElementById('projectModal').style.display = 'none'; if (event.target === document.getElementById('editDraftModal')) document.getElementById('editDraftModal').style.display = 'none'; };
+            updateTotal();
+        });
+        
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+            // Gestión de imagen del Hero
+        function loadHeroImage() {
+            const savedImage = localStorage.getItem('nexus_hero_image');
+            const heroImageInput = document.getElementById('heroImageUrl');
+            if (heroImageInput && savedImage) {
+                heroImageInput.value = savedImage;
+                document.getElementById('heroPreviewImg').src = savedImage;
+                document.getElementById('heroPreview').style.display = 'block';
+            }
+        }
+
+        const heroImageInput = document.getElementById('heroImageUrl');
+        if (heroImageInput) {
+            heroImageInput.addEventListener('input', (e) => {
+                const url = e.target.value;
+                if (url) {
+                    document.getElementById('heroPreviewImg').src = url;
+                    document.getElementById('heroPreview').style.display = 'block';
+                } else {
+                    document.getElementById('heroPreview').style.display = 'none';
+                }
+            });
+        }
+
+        const saveHeroBtn = document.getElementById('saveHeroImageBtn');
+        if (saveHeroBtn) {
+            saveHeroBtn.addEventListener('click', () => {
+                const url = document.getElementById('heroImageUrl').value;
+                if (url) {
+                    localStorage.setItem('nexus_hero_image', url);
+                    alert('✅ Imagen de portada guardada. Se actualizará en la página principal.');
+                } else {
+                    localStorage.removeItem('nexus_hero_image');
+                    alert('⚠️ Imagen eliminada. Se usará el fondo por defecto.');
+                }
+            });
+        }
+
+        loadHeroImage();
+    </script>
+    
+</body>
+</html>
