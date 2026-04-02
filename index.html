@@ -29,7 +29,7 @@
         <nav class="navbar container">
             <div class="logo">
                 <i class="fas fa-chart-line"></i>
-                <span>Efecto Media<span class="highlight">Marketing</span></span>
+                <span>Efecto<span class="highlight">Media</span></span>
             </div>
             <div class="nav-menu" id="navMenu">
                 <ul class="nav-links">
@@ -51,8 +51,8 @@
     </header>
 
     <main>
-           <!-- ==================== HERO SECTION ==================== -->
-        <section id="home" class="hero" id="heroSection">
+        <!-- ==================== HERO SECTION CON IMAGEN ==================== -->
+        <section id="home" class="hero" id="heroSection" style="background: linear-gradient(135deg, rgba(10,37,64,0.85), rgba(15,43,61,0.9)), url('https://res.cloudinary.com/dvfrcrjv1/image/upload/v1775154544/Gemini_Generated_Image_sdy8cjsdy8cjsdy8_jfhm6k.png') center/cover fixed;">
             <div class="hero-overlay"></div>
             <div class="hero-content container" data-aos="fade-up" data-aos-duration="1000">
                 <div class="hero-badge">
@@ -197,7 +197,7 @@
                 <div class="footer-brand">
                     <div class="logo">
                         <i class="fas fa-chart-line"></i>
-                        <span>Nexus<span class="highlight">Marketing</span></span>
+                        <span>Efecto<span class="highlight">Media</span></span>
                     </div>
                     <p>Transformando ideas en resultados medibles desde 2014.</p>
                     <div class="social-links">
@@ -234,16 +234,16 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Nexus Marketing. Todos los derechos reservados. Innovación que conecta.</p>
+                <p>&copy; 2025 Efecto Media. Todos los derechos reservados. Innovación que conecta.</p>
             </div>
         </div>
     </footer>
 
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-       <script src="js/main.js"></script>
+    <script src="js/main.js"></script>
     <script>
-        // Cargar imagen del hero desde localStorage
+        // Cargar imagen del hero desde localStorage (si el admin cambia la imagen)
         function loadHeroBackground() {
             const heroSection = document.getElementById('heroSection');
             const savedImage = localStorage.getItem('nexus_hero_image');
@@ -251,7 +251,8 @@
                 if (savedImage && savedImage.trim() !== '') {
                     heroSection.style.background = `linear-gradient(135deg, rgba(10,37,64,0.85), rgba(15,43,61,0.9)), url('${savedImage}') center/cover fixed`;
                 } else {
-                    heroSection.style.background = `linear-gradient(135deg, var(--deep-blue) 0%, var(--dark-navy) 100%)`;
+                    // Imagen por defecto
+                    heroSection.style.background = `linear-gradient(135deg, rgba(10,37,64,0.85), rgba(15,43,61,0.9)), url('https://res.cloudinary.com/dvfrcrjv1/image/upload/v1775154544/Gemini_Generated_Image_sdy8cjsdy8cjsdy8_jfhm6k.png') center/cover fixed`;
                 }
             }
         }
@@ -266,7 +267,5 @@
             }
         });
     </script>
-</body>
-</body>
 </body>
 </html>
